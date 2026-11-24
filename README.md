@@ -1,47 +1,53 @@
 # User Service
 
-REST API для управления пользователями на FastAPI. Данные хранятся в памяти (без БД).
+Гибридный REST API: **HTTP-сервис на Go**, **валидация на Python**.
+
+Данные хранятся в памяти (без БД).
+
+## Архитектура
+
+```
+Клиент → Go (net/http) → Python validate_cli.py → Go store → ответ
+```
+
+- Go принимает запросы, хранит пользователей, отдаёт ответы
+- Python нормализует и проверяет `name`, `email`, `age`
+- Связь: Go запускает `python/validate_cli.py` и обменивается JSON через stdin/stdout
 
 ## Возможности
 
-- создание, чтение, обновление и удаление пользователей
-- валидация email, имени и возраста
-- проверка уникальности email
-- фильтрация списка по минимальному возрасту
+- CRUD пользователей
+- валидация email, имени и возраста (Python)
+- уникальность email
+- фильтр списка по `min_age`
 - health-check
+- Swagger UI и OpenAPI
 
-## Стек
+## Требования
 
-- Python 3.10+
-- FastAPI
-- Pydantic v2
-- Uvicorn
+- Go 1.22+
+- Python 3.10+ (стандартная библиотека, без pip-зависимостей)
 
-## Установка и запуск
+## Запуск
+
+Из корня репозитория:
 
 ```bash
-pip install -r requirements.txt
-uvicorn app:app --reload
+go run ./cmd/server
 ```
 
-Сервис будет доступен по адресу: http://127.0.0.1:8000
+Сервис: http://127.0.0.1:8000
 
-Интерактивная документация:
+Документация:
 
 - Swagger UI: http://127.0.0.1:8000/docs
-- ReDoc: http://127.0.0.1:8000/redoc
-- OpenAPI JSON: http://127.0.0.1:8000/openapi.json
+- OpenAPI: http://127.0.0.1:8000/openapi.json
 
-Статические файлы спецификации в репозитории:
+Опционально:
 
-- [`openapi.yaml`](openapi.yaml)
-- [`openapi.json`](openapi.json)
-
-Обновить файлы после изменения API:
-
-```bash
-python export_openapi.py
-```
+- `PORT` — порт сервиса
+- `PYTHON_BIN` — путь к Python (по умолчанию `python`)
+- `PYTHON_VALIDATOR` — путь к `validate_cli.py`
 
 ## API
 
@@ -54,7 +60,7 @@ python export_openapi.py
 | PUT    | `/users/{id}`    | Обновить пользователя                         |
 | DELETE | `/users/{id}`    | Удалить пользователя                          |
 
-### Модель пользователя
+### Модель
 
 ```json
 {
@@ -64,41 +70,36 @@ python export_openapi.py
 }
 ```
 
-Правила валидации:
+Правила:
 
 - `name` — непустая строка (1–100 символов)
-- `email` — корректный email, сохраняется в нижнем регистре
+- `email` — корректный email, в нижнем регистре
 - `age` — целое число от 1 до 149
-- email должен быть уникальным
+- email уникален
 
-### Примеры
-
-Создать пользователя:
-
-```bash
-curl -X POST http://127.0.0.1:8000/users \
-  -H "Content-Type: application/json" \
-  -d "{\"name\": \"Alice\", \"email\": \"alice@example.com\", \"age\": 25}"
-```
-
-Список с фильтром:
-
-```bash
-curl "http://127.0.0.1:8000/users?min_age=18"
-```
-
-## Структура проекта
+## Структура
 
 ```
-├── app.py              # FastAPI-приложение и эндпоинты
-├── validators.py       # Валидация email и возраста
-├── openapi.yaml        # OpenAPI 3 спецификация
-├── openapi.json        # OpenAPI 3 (JSON)
-├── export_openapi.py   # Экспорт OpenAPI из приложения
-├── requirements.txt    # Зависимости
+├── cmd/server/              # точка входа Go
+├── internal/
+│   ├── handlers/            # HTTP handlers
+│   ├── models/              # DTO
+│   ├── pyvalidate/          # вызов Python-валидатора
+│   ├── server/              # роутинг и docs
+│   └── store/               # in-memory хранилище
+├── python/
+│   ├── validators.py        # правила валидации
+│   └── validate_cli.py      # CLI-мост для Go
+├── openapi.yaml
+├── openapi.json
+├── go.mod
 └── README.md
 ```
 
-## Примечание
+## Тесты
 
-Хранилище `users_db` — словарь в памяти. После перезапуска сервиса данные сбрасываются.
+```bash
+go test ./...
+```
+
+Запускать из корня репозитория, чтобы Go нашёл `python/validate_cli.py`.

@@ -7,3 +7,17 @@ venv/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Go
+bin/
+dist/
+.tools/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+user-service
+go.sum
