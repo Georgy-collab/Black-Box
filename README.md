@@ -36,6 +36,13 @@
 go run ./cmd/server
 ```
 
+### Docker
+
+```bash
+docker build -t user-service .
+docker run --rm -p 8000:8000 --name user-service user-service
+```
+
 Сервис: http://127.0.0.1:8000
 
 Документация:
@@ -92,6 +99,8 @@ go run ./cmd/server
 │   └── validate_cli.py      # CLI-мост для Go
 ├── openapi.yaml
 ├── openapi.json
+├── Dockerfile
+├── .dockerignore
 ├── go.mod
 └── README.md
 ```

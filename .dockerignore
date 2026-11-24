@@ -1,0 +1,13 @@
+.git
+.tools
+__pycache__
+*.pyc
+*.exe
+*.test
+*.out
+.venv
+venv
+user-service
+README.md
+.gitignore
+**/*_test.go
