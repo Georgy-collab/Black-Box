@@ -26,7 +26,22 @@ uvicorn app:app --reload
 
 Сервис будет доступен по адресу: http://127.0.0.1:8000
 
-Документация Swagger: http://127.0.0.1:8000/docs
+Интерактивная документация:
+
+- Swagger UI: http://127.0.0.1:8000/docs
+- ReDoc: http://127.0.0.1:8000/redoc
+- OpenAPI JSON: http://127.0.0.1:8000/openapi.json
+
+Статические файлы спецификации в репозитории:
+
+- [`openapi.yaml`](openapi.yaml)
+- [`openapi.json`](openapi.json)
+
+Обновить файлы после изменения API:
+
+```bash
+python export_openapi.py
+```
 
 ## API
 
@@ -77,6 +92,9 @@ curl "http://127.0.0.1:8000/users?min_age=18"
 ```
 ├── app.py              # FastAPI-приложение и эндпоинты
 ├── validators.py       # Валидация email и возраста
+├── openapi.yaml        # OpenAPI 3 спецификация
+├── openapi.json        # OpenAPI 3 (JSON)
+├── export_openapi.py   # Экспорт OpenAPI из приложения
 ├── requirements.txt    # Зависимости
 └── README.md
 ```
